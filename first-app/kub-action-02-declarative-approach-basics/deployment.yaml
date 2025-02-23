@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: first-app-pod
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: first-app-pod
+        tier: backend
+    spec:
+      containers:
+        - name: first-app-container
+          image: rijojohn85/kub-first-app:2

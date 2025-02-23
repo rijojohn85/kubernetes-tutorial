@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: first-app-pod
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080
+    # - protocol: 'TCP'
+    #   port: 443
+    #   targetPort: 443
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: first-app-pod
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: first-app-pod
+        tier: backend
+    spec:
+      containers:
+        - name: first-app-container
+          image: rijojohn85/kub-first-app:2
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 10
+            initialDelaySeconds: 5
