@@ -1,0 +1,8 @@
+{
+    "yaml.schemas": {
+        "kubernetes://schema/v1@service": [
+            "file:///Users/rijojohn/dev/kubernetes/kubernetes-tutorial/networking/kubernetes/users-service.yaml",
+            "file:///Users/rijojohn/dev/kubernetes/kubernetes-tutorial/networking/kubernetes/tasks-deployment.yaml"
+        ]
+    }
+}
