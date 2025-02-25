@@ -1,21 +1,9 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: story-deployment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: story-pod
-  template:
-    metadata:
-      labels:
-        app: story-pod
-    spec:
-      containers:
-        - name: story-container
-          image: rijojohn85/story-image:1
-
+  name: data-store-env #custom name
+data:
+  dir: "story"
 ---
 apiVersion: v1
 kind: Service
@@ -29,3 +17,66 @@ spec:
       protocol: "TCP"
       targetPort: 3000
   type: LoadBalancer
+---
+#hostPath PV
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-pv
+spec:
+  capacity:
+    storage: 100Mi
+  volumeMode: Filesystem # or block
+  storageClassName: standard
+  accessModes: #registers the avaiable types, consumned in PV claim
+    - ReadWriteOnce
+  hostPath:
+    path: /data
+    type: DirectoryOrCreate
+---
+#hostPath PVC
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: host-pvc
+spec:
+  volumeName: host-pv
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: story-pod
+  template:
+    metadata:
+      labels:
+        app: story-pod
+    spec:
+      volumes:
+        - name: story-volume
+          persistentVolumeClaim:
+            claimName: host-pvc
+      containers:
+        - name: story-container
+          image: rijojohn85/story-image:3
+          env:
+            - name: STORY_DIR
+              valueFrom:
+                configMapKeyRef:
+                  name: data-store-env #name of the configMap
+                  key: dir #key needed from configMap
+          volumeMounts:
+            - mountPath: /app/story
+              name: story-volume

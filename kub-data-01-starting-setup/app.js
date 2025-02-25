@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-const filePath = path.join(__dirname, 'story', 'text.txt');
+const filePath = path.join(__dirname, process.env.STORY_DIR, 'text.txt');
 
 app.use(bodyParser.json());
 
@@ -17,6 +17,10 @@ app.get('/story', (req, res) => {
     }
     res.status(200).json({ story: data.toString() });
   });
+});
+
+app.get("/error", (req, res)=>{
+  process.exit(1);
 });
 
 app.post('/story', (req, res) => {
